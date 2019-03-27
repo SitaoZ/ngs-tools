@@ -1,12 +1,18 @@
 #/usr/bin/python3
 
-import os,sys
+import os
 import re
+import sys
 import gzip
 from collections import defaultdict
 
+"""
+Author: Zhu Sitao
+Date : 2018-3-21
+Dest: a fastq class; used in python 3.6
+"""
 
-class fastq(object):
+class Fastq(object):
     """a class deal fastq file
         new fastq name: @HISEQ:310:C5MH9ANXX:1:1101:3517:2043 2:N:0:TCGGTCAC
         old fastq name: @FCD1PB1ACXX:4:1101:1799:2201#GAAGCACG/2
@@ -16,8 +22,8 @@ class fastq(object):
         self.patternNew = re.compile(r'(?P<id>\d):N:(\d):(?P<index>\S+)',re.VERBOSE)
         self.patternOld = re.compile(r'\@\S+\#(?P<index>\S+?)\/(?P<id>\d)',re.VERBOSE)
 
-    def fastqIN(self):
-        """ read fastq """
+    def readFastq(self):
+        """ Return fastq file line by line """
         if self.path.endswith("gz"):
             FH = gzip.open(self.path,'r')
         else:
@@ -27,10 +33,10 @@ class fastq(object):
         FH.close()
 
     def qualitySystem(self):
-        """ quality system from 100 lines"""
+        """ Return quality system """
         lineCount = 0
         checklines = ''
-        for line in self.fastqIN():
+        for line in self.readFastq():
             lineCount += 1
             if lineCount > 100:
                 break
@@ -60,9 +66,10 @@ class fastq(object):
 
 
     def indexSequence(self):
+        """ Return index list """
         indexDict = defaultdict(int)
         indexList = []
-        for line in self.fastqIN():
+        for line in self.readFastq():
             matchNew = self.patternNew.search(line)
             matchOld = self.patternOld.search(line)
             if matchNew:
@@ -76,8 +83,9 @@ class fastq(object):
         return indexList
 
     def pairOrSingel(self):
+        """ Return the fastq type: single end or paired ends """
         count, singel, pair = 0, 0, 0
-        for line in self.fastqIN():
+        for line in self.readFastq():
             matchNew = self.patternNew.search(line)
             matchOld = self.patternOld.search(line)
             if matchNew:
@@ -100,9 +108,10 @@ class fastq(object):
 
 
     def to_fatsta(self,output_fasta):
+        """ Transformate fastq into fasta """
         OUT=open(output_fasta,'w')
         flag = 0
-        for line in self.fastqIN():
+        for line in self.readFastq():
             flag += 1
             if flag == 1:
                 OUT.writelines(">"+line) ## ID
