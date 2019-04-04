@@ -9,16 +9,53 @@ GFF stands for Generic Feature Format. GFF files are plain text, 9 column, tab-d
 GFF databases also exist. They use a schema custom built to represent GFF data.
 GFF is frequently used in GMOD for data exchange and representation of genomic data.
 http://gmod.org/wiki/GFF3
+
+Fields
+Fields must be tab-separated. Also, all but the final field in each feature line must contain a value; "empty" columns should be denoted with a '.'
+
+seqname - name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. Important note: the seqname must be one used within Ensembl, i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, without any additional content such as species or assembly. See the example GFF output below.
+source - name of the program that generated this feature, or the data source (database or project name)
+feature - feature type name, e.g. Gene, Variation, Similarity
+start - Start position of the feature, with sequence numbering starting at 1.
+end - End position of the feature, with sequence numbering starting at 1.
+score - A floating point value.
+strand - defined as + (forward) or - (reverse).
+frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
+attribute - A semicolon-separated list of tag-value pairs, providing additional information about each feature.
 """
+
+
+
+
+
+class gffParse(object):
+	""" a parse for gff line """
+	def __init__(self,seqname,source,feature,start,end,score,strand,frame,attribute):
+		self.seqname = seqname
+		self.source = source
+		self.feature = feature
+		self.start = start
+		self.end = end
+		self.score = score
+		self.strant = strand
+		self.frame = frame
+		self.attribute = attribute
+	def region(self):
+		return eval(self.end) - eval(self.start)
+
+
+
+
 
 class GFF(object):
 	""" Read GFF(general feature format) """
 	def __init__(self,gffPath):
 		self._gff = dict()
-		self._filePath = gffPath
+		self.gffPath = gffPath
 		self._class = none
 		self._mRNA = dict()
 		self._CDS = dict()
+		self.version=
 
 		self.geneid_pattern = re.compile(r'geneID=(?P<id>\S+);?')
 		self.mRNA_pattern = re.compile(r'ID=(?P<id>\S+);')
@@ -28,11 +65,22 @@ class GFF(object):
 	def __iter__(self):
 		""" Supports traversal with a for loop"""
 		return iter(self._gff)
+	def _handle(self):
+		""" return a gff handle """
+		if 'gz' in self.gffPath:
+			fh= gzip.open(self.gffPath, 'rb')
+		else:
+			fh = open(self.gffPath, 'r')
+		return fh
 	def readGFF(self):
 		""" Return gff file line by line through generator """
-		fh = open(self._filePath)
-		for line in fh:
+		for line in self._handle():
 			yield line
+	def gff_version(self):
+		""" return gff version """
+		version = int(self._handle().readline().strip().split()[1])
+		return True if version == 3 else False
+
 	def annotation_chr(self):
 		""" Return a chromosome list """
 		chr_list = []
