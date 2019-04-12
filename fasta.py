@@ -12,10 +12,16 @@ Dest: a DNA fasta class; used in python 3.6
 class Fasta(object):
 	""" Fasta class """
 	fastaName = "zhusitao"
+	BASES = ['T', 'C', 'A', 'G']
+	CODONS = [a + b + c for a in BASES for b in BASES for c in BASES]
+	AMINO_ACIDS = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
+	CODON_TABLE = dict(zip(CODONS, AMINO_ACIDS))
 	
-	def __init__(self):
+	def __init__(self,filePath):
 		self._fasta = dict()
-
+		if isinstance(filePath,str):
+			self.path = filePath
+		self.readFasta()
 	def __str__(self):
 		""" Print the fasta dict """
 		return self._fasta.__str__()
@@ -27,47 +33,18 @@ class Fasta(object):
 		outPut = self.fasta_parse(index,self._fasta[index],number = 50)
 		return outPut
 	def __len__(self):
-		""" return fasta item length """
-		return len(self._fasta.keys())
-	def __contains__(self, item):
-		""" return true if a fasta class contains the item,or false"""
-		if item in self._fasta.keys():
-			return True
-		else:
-			return False
-	def __eq__(self, other):
-		""" Return True if self equals other or False otherwise """
-		if self is other: return True
-		if type(self) != type(other) or len(self) != len(other):
-			return False
-		for item in self:
-			if item not in other:
-				return False
-		return True
+		""" Total sequence length of the fasta file """
+		totalLength = 0
+		for ID in self._fasta:
+			totalLength += len(self._fasta[ID])
+		return totalLength
 
-
-	def __add__(self, other):
-		""" return a new fasta contains the contents of self and other"""
-		result = Fasta()
-		for item in other:
-			result._fasta[item] = other._fasta[item]
-		for item in self:
-			result._fasta[item] = self._fasta[item]
-		return result
-
-
-
-
-	def readFasta(self,path):
+	def readFasta(self):
 		""" Read Fasta file and load in a dict ,normal method
 			使用groupby 将文本文件做成一个生成器，生成器没有把所有值存在内存中，而是在运行时生成的值，可以快速访问大文件。
 			生成器你只能对其迭代一次。
 		"""
-
-		try:
-			fh = open(path)
-		except KeyError:
-			print("The path is a compressed file")
+		fh = open(self.path)
 		faiter =(x[1] for x in groupby(fh,lambda line : line[0] == ">"))
 		for header in faiter:
 			header = header.__next__()[1:].strip() # [1:] 为了去除 > 符号
@@ -75,34 +52,26 @@ class Fasta(object):
 			seq ="".join(s.strip() for s in faiter.__next__()) 
 			self._fasta[header] = seq.upper()
 
-	def fasta_key_list(self):
+	def fasta_key(self):
 		""" return a list of fasta name"""
 		return self._fasta.keys()
 
-	def fasta_sequence_list(self):
+	def fasta_sequence(self):
 		""" return a list of sequence"""
 		return self._fasta.values()
 
-
-	def fasta_key_count(self):
+	def item_count(self):
 		""" return numbers fasta names"""
-		item_total_number = len(self.fasta_key_list())
+		item_total_number = len(self.fasta_key())
 		return item_total_number
 
-	def fasta_sequence_length(self):
-		""" return all fasta length """
-		totalLength = 0
-		for ID in self._fasta:
-			totalLength += len(self._fasta[ID])
-		return totalLength
-
-	def std_out(self, line_number = 60):
+	def std_out(self, number = 60):
 		""" printf sequence to stdout """
-		for ID in self.fasta_key_list():
+		for ID in self.fasta_key():
 			seqIn = self._fasta[ID]
-			print(self.fasta_parse(ID,seqIn,number = line_number))
+			print(self.fasta_parse(ID,seqIn,number = 50))
 	def gc_rate(self,output_txt):
-		""" Write each fasta GC and GC rate to a file """
+		""" Show each fasta GC and GC rate"""
 		Stat = open(output_txt,'w')
 		Stat.writelines("ID\tGC\tGCrate(%)\tN\tNrate(%)\n")
 		totalGC,totalN = 0,0
@@ -120,7 +89,7 @@ class Fasta(object):
 		Stat.writelines("total\t%d\t%.4f\t%d\t%.4f"%(totalGC,totalGCrate,totalN,totalNrate))
 		Stat.close()
 
-	def stat_item_length(self):
+	def stat_length(self):
 		""" Statistic of each id length """
 		#LenDict = defaultdict(int)
 		LenDict = dict()
@@ -140,10 +109,28 @@ class Fasta(object):
 		totalOut = ">"+index+"\n"+seqOut + remainder+ "\n"
 		return totalOut
 
-	def reverse(self):
+	def reverse(self,seq):
 		"""reverse fasta seq"""
-		for line in self.readFasta():
-			pass
+		return seq[::-1]
+
+	def complement(self,seq):
+		""" complement seq """
+		COMPLEMENT_TRANS = str.maketrans('TAGCtagc', 'ATCGATCG')
+		return seq.translate(COMPLEMENT_TRANS)
+
+	def reverse_complement(self,seq):
+		""" return reverse and complement seq"""
+		return self.reverse(self.complement(seq))
+
+	def translate(self,seq):
+		seq = seq.lower().replace('\n', '').replace(' ', '')
+		peptide = ''
+		for i in range(0, len(seq), 3):
+			codon = seq[i: i + 3]
+			amino_acid = CODON_TABLE.get(codon, '!')
+			if amino_acid != '!':  # end of seq
+				peptide += amino_acid
+		return peptide
 
 	@classmethod
 	def basename(cls):
@@ -157,17 +144,17 @@ class Fasta(object):
 
 
 	def _max_min(self,type):
-		sort_dict = sorted(self.stat_item_length().items(), key=lambda d: d[1], reverse=True)
+		sort_dict = sorted(self.stat_length().items(), key=lambda d: d[1], reverse=True)
 		if type == 'max':
 			max_item = sort_dict[0]
 			return max_item
 		elif type == 'min':
-			min_item = sort_dict[self.fasta_key_count()-1]
+			min_item = sort_dict[self.item_count()-1]
 			return min_item
 		else:
 			return "%s not max or min"%type
 
-	def max_min_length(self,type,outfile):
+	def extract_item(self,type,outfile):
 		""" extract max or min length fasta item"""
 		if type.lower() not in ['max','min']:
 			raise KeyError(str(type)+" not contain,should be min or max")
@@ -180,46 +167,14 @@ class Fasta(object):
 				OUT.writelines(self.fasta_parse(key, self._fasta[key]))
 			else:
 				print ("%s not correct,should be max or min"%type)
-
-	def extract_item(self,key):
-		""" extract a given fasta item """
-		if key in self.fasta_key_list():
-			result = self.fasta_parse(key,self._fasta[key])
-		else:
-			raise KeyError(str(key)+" not contain,should be min or max")
-
 	def random_sample(self,number,outpath):
 		""" ramdom sample from the all fasta file"""
 		OUT = open(outpath,'w')
-		sample_list = sample(self.fasta_key_list(),number)
+		key_list = self.fasta_key()
+		sample_list = sample(key_list,number)
 		for key in sample_list:
 			OUT.writelines(self.fasta_parse(key,self._fasta[key]))
 		OUT.close()
 
-    def gc(self,binsize = 500):
-        """
-        %prog gc fastafile
-        Plot G+C content distribution.
-        """
-        allbins = []
-        for name, seq in self._fasta.items():
-            for i in range(len(seq) // binsize):
-                atcnt = gccnt = 0
-                for c in seq[i * binsize: (i + 1) * binsize].upper():
-                    if c in "AT":
-                        atcnt += 1
-                    elif c in "GC":
-                        gccnt += 1
-                totalcnt = atcnt + gccnt
-                if totalcnt == 0:
-                    continue
-                gcpct = gccnt * 100 // totalcnt
-                allbins.append(gcpct)
 
-        from jcvi.graphics.base import asciiplot
-        from collections import Counter
 
-        title = "Total number of bins={}".format(len(allbins))
-        c = Counter(allbins)
-        x, y = zip(*sorted(c.items()))
-        asciiplot(x, y, title=title)

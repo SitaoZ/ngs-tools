@@ -1,5 +1,5 @@
 import re
-from fasta import Fasta
+from format.fasta import Fasta
 """
 Author: Zhu Sitao
 Date: 2018-3-21
@@ -55,8 +55,7 @@ class GFF(object):
 		self._class = none
 		self._mRNA = dict()
 		self._CDS = dict()
-		self.version=
-
+		self.version3 = self.gff_version()
 		self.geneid_pattern = re.compile(r'geneID=(?P<id>\S+);?')
 		self.mRNA_pattern = re.compile(r'ID=(?P<id>\S+);')
 		self.cds_pattern = re.compile(r'Parent=(?P<id>\S+);?')

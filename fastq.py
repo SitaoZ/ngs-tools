@@ -1,8 +1,7 @@
 #/usr/bin/python3
 
-import os
+import os,sys
 import re
-import sys
 import gzip
 from collections import defaultdict
 
@@ -12,6 +11,12 @@ Date : 2018-3-21
 Dest: a fastq class; used in python 3.6
 """
 
+RANGES = {
+    'sanger': (33, 75),
+    'illumina-1.8': (33, 79),
+    'solexa': (59, 106),
+    'phred64': (64, 106),
+}
 class Fastq(object):
     """a class deal fastq file
         new fastq name: @HISEQ:310:C5MH9ANXX:1:1101:3517:2043 2:N:0:TCGGTCAC
@@ -43,7 +48,12 @@ class Fastq(object):
             else:
                 if lineCount % 4 == 0:
                     checklines += line.strip()
-
+        c = [ord(x) for x in checklines]
+        mi,ma = min(c),max(c)
+        for format,v in RANGES.items():
+            m1,m2 = v
+            if mi >= m1 and ma <= m2:
+                return format
         MAX = 0
         MIN = 100
         for one in map(ord,checklines):
@@ -63,7 +73,23 @@ class Fastq(object):
         else:
             return "Unknown score encoding"
 
-
+    def qualsFormat(self):
+        """ Return quality system """
+        lineCount = 0
+        checklines = ''
+        for line in self.readFastq():
+            lineCount += 1
+            if lineCount > 100:
+                break
+            else:
+                if lineCount % 4 == 0:
+                    checklines += line.strip()
+        c = [ord(x) for x in checklines]
+        mi,ma = min(c),max(c)
+        for format,v in RANGES.items():
+            m1,m2 = v
+            if mi >= m1 and ma <= m2:
+                return format
 
     def indexSequence(self):
         """ Return index list """

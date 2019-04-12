@@ -1,5 +1,6 @@
 import re,os
 import sys
+import gzip
 
 """
 Author: Zhu Sitao
@@ -9,6 +10,7 @@ VCF is a text file format (most likely stored in a compressed manner).
 It contains meta-information lines, a header line, and then data lines 
 each containing information about a position in the genome.
 http://www.internationalgenome.org/wiki/Analysis/vcf4.0
+http://samtools.github.io/hts-specs/VCFv4.2.pdf
 """
 
 class Header(object):
@@ -90,6 +92,14 @@ class Header(object):
 					sampleList.append(temp[sample])
 		return sampleList
 
+
+	def header_to_file(self,out_path):
+		""" write a header to a file """
+		F = open(out_path,'w')
+		for line in self.readHeader():
+			F.write(line)
+		F.close()
+
 class Recorder(object):
 	""" a recorder for vcf """
 	def __init__(self, CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO,FORMAT,CALLS):
@@ -133,6 +143,17 @@ class Recorder(object):
 			line.append(call)
 		return "\t".join(line)
 
+	def filter_by_quality(self, cutoff=30):
+		""" filter vcf by information """
+		if self.QUAL > cutoff:
+			return self.record_to_line()
+
+	def filter_by_depth(self,down,up):
+		""" filter vcf by depth <4 or >200"""
+		info = Info(self.INFO)
+		if info.DP <= up or info.DP >= down:
+			return self.record_to_line()
+
 
 class AltRecord(object):
 	""" A class  for alternative allele record """
@@ -163,6 +184,36 @@ class Call(object):
 		genotype_index = self.data.split(":")[0].split("/")
 		return genotype_index
 
+class Info(object):
+	""" a class for vcf INFO column """
+	def __init__(self,data):
+		# An integer,Allele count in genotypes, for each ALT allele, in the same order as listed
+		self.data = data
+		self.DP =self.depth()
+		self.AC = self.allele_count()
+		self.AF = self.allele_frequency()
+	def depth(self):
+		""" return a Combined depth across samples"""
+		DP_pattern = re.compile(r'DP=(?P<value>\d+);')
+		DP_value = DP_pattern.search(self.data).group('value')
+		return DP_value
+	def allele_count(self):
+		""" return a allele count """
+		AC_pattern = re.compile(r'AC=(?P<value>\d+);')
+		AC_value = AC_pattern.search(self.data).group('value')
+		return AC_value
+	def allele_frequency(self):
+		""" return an allele frequency """
+		AF_pattern = re.compile(r'AF=(?P<value>-?\d+\.?\d*e?-?\d*)?;')
+		AF_value = AF_pattern.search(self.data).group('value')
+		return AF_value
+
+
+
+
+
+
+
 
 class VCF(object):
 	""" VCF class """
@@ -170,16 +221,20 @@ class VCF(object):
 		self.path = vcfpath
 	def readVCF(self):
 		""" Return a vcf file line by line """
+		if not os.path.exists(self.path):
+			sys.exit("%s file not exist\n"%(self.path))
 		if self.path.endswith(".gz"):
-			sys.exit(1)
-		with open(self.path,'r') as F:
-			for line in F:
-				if not line.startswith('#'):
-					array = line.strip().split()
-					CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT= array[0:9]
-					CALLS = array[9:len(array)]
-					recorder = Recorder(CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,CALLS)
-					yield recorder
+			F = gzip.open(self.path)
+		else:
+			F = open(self.path,'r')
+		for line in F:
+			if not line.startswith('#'):
+				array = line.strip().split()
+				CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT= array[0:9]
+				CALLS = array[9:len(array)] # a list
+				recorder = Recorder(CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,CALLS)
+				yield recorder
+		F.close()
 
 	def __len__(self):
 		""" Return numbers of items in self """
@@ -267,6 +322,43 @@ class VCF(object):
 	def reduceNonSites(self):
 		pass
 
+	def extract_snp(self,snp_path):
+		""" extract snp into a new vcf """
+		F = open(snp_path,'w')
+		for recorder in self.readVCF():
+			if len(recorder.REF) == len(recorder.ALT):
+				F.write(recorder.record_to_line())
+		F.close()
+
+
+
+	def extract_indel(self,indel_path):
+		""" extract indel into a new vcf """
+		F =open(indel_path,'w')
+		for recorder in self.readVCF():
+			if ',' in recorder.ALT:
+				if len(recorder.REF) != len(recorder.ALT.split(',')[0]) :
+					F.write(recorder.record_to_line())
+			else:
+				if len(recorder.REF) != len(recorder.ALT):
+					F.write(recorder.record_to_line())
+		F.close()
+
+	def stat_indel_length(self):
+		""" return a indel length dict for draw indel length histogram """
+		indel_length = {}
+		for recorder in self.readVCF():
+			if len(recorder.REF) == 1 and len(recorder.ALT) == 1:
+				continue
+			else:
+				length = len(recorder.ALT) - len(recorder.REF)
+				if length in indel_length.keys():
+					indel_length[length] += 1
+				else:
+					indel_length[length] = 1
+		return indel_length
+
+
 
 	def vcf2genotype(self,genotype_outpath):
 		""" Transformate population vcf to genotype """
@@ -315,16 +407,21 @@ class VCF(object):
 				OUT.write("\n")
 		OUT.close()
 
-	def filter_by_quality(self,cutoff=30):
-		""" filter vcf by information """
-		for line in self.readVCF():
-			if self.info_pattern.match(line):
-				print(line)
-			elif self.head_pattern.match(line):
-				print(line)
+
+	def ts_tv(self):
+		""" transitions and transversions for snp """
+		ts,tv = 0,0
+		ts_flag = ["AG","GA","CT","TC"]
+		tv_flag = ["AC","CA","GT","TG","GC","CG","AT","TA"]
+		for recorder in self.readVCF():
+			ref = recorder.REF
+			ale = recorder.ALT
+			if ref.upper()+ale.split(',')[0].upper() in ts_flag:
+				ts += 1
 			else:
-				QUAL = line.strip().split()[5]
-				if QUAL > cutoff:
-					print(line)
-	def filter_by_genotype(self):
-		pass
+				tv += 1
+		return ts,tv,'%.6f'%(ts/float(tv))
+
+
+
+
