@@ -1,7 +1,7 @@
 # ngs-tools
 
 Python program for bioinformatics
-gff.py用于读取gff格式
-bam.py用于读取bam比对文件
-fastq.py用于处理的fastq文件
+package format is a bioinformatics file format 
+package util is a common tools software
+package PopGen is a population genetics software
 
