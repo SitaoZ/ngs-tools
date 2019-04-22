@@ -120,9 +120,8 @@ class Fasta(object):
 
 	def std_out(self, number=60):
 		""" printf sequence to stdout """
-		for ID in self.fasta_key():
-			seqIn = self._fasta[ID]
-			print(self.fasta_parse(ID, seqIn, number=50))
+		for record in self.fasta_sequence():
+			print(record.fasta_parse(number=number))
 
 
 	def gc_rate(self, output_txt):
@@ -130,8 +129,8 @@ class Fasta(object):
 		Stat = open(output_txt, 'w')
 		Stat.writelines("ID\tGC\tGCrate(%)\tN\tNrate(%)\n")
 		totalGC, totalN = 0, 0
-		for ID in self._fasta:
-			seqIn = self._fasta[ID]
+		for record in self.fasta_sequence():
+			seqIn = record.seq
 			GC = seqIn.count("G") + seqIn.count("C")
 			N = seqIn.count("N")
 			totalGC += GC
@@ -149,15 +148,15 @@ class Fasta(object):
 		""" Statistic of each id length """
 		# LenDict = defaultdict(int)
 		LenDict = dict()
-		for ID in self._fasta:
-			LenDict[ID] = len(self._fasta[ID])
+		for ID,record in self._fasta.items():
+			LenDict[ID] = len(record.seq)
 		return LenDict
 
 
 	@classmethod
 	def basename(cls):
 		""" class method """
-		return cls.fastaName
+		return os.path.basename(cls)
 
 
 	@staticmethod
@@ -183,12 +182,12 @@ class Fasta(object):
 		if type.lower() not in ['max', 'min']:
 			raise KeyError(str(type) + " not contain,should be min or max")
 		with open(outfile, 'w') as OUT:
-			max_min_item = self._max_min(type)
-			key, value = max_min_item
+			key, value = self._max_min(type)
+			record = self._fasta[key]
 			if type == 'max':
-				OUT.writelines(self.fasta_parse(key, self._fasta[key]))
+				OUT.writelines(record.fasta_parse())
 			elif type == 'min':
-				OUT.writelines(self.fasta_parse(key, self._fasta[key]))
+				OUT.writelines(record.fasta_parse())
 			else:
 				print("%s not correct,should be max or min" % type)
 
@@ -199,7 +198,8 @@ class Fasta(object):
 		key_list = self.fasta_key()
 		sample_list = sample(key_list, number)
 		for key in sample_list:
-			OUT.writelines(self.fasta_parse(key, self._fasta[key]))
+			record = self._fasta[key]
+			OUT.writelines(record.fasta_parse())
 		OUT.close()
 
 
