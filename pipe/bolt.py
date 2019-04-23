@@ -7,14 +7,14 @@ from optparse import OptionParser
 
 
 def catfq(fqpath,sampleid,chipID,outdir):
-	cat_dir = os.path.join(outdir,'steq1_catfq')
+	cat_dir = os.path.join(outdir,'step1_catfq')
 	os.mkdir(cat_dir)
 	fq1list = glob.glob('%s/%s_*_1.fq.gz'%(fqpath,chipID))
 	fq2list = glob.glob('%s/%s_*_2.fq.gz'%(fqpath,chipID))
 	fq1 = " ".join(fq1list)
 	fq2 = " ".join(fq2list)
-	cmd1 = 'zcat {fq1}|/hwfssz1/ST_BIGDATA/USER/zhusitao/Software/seqtk/seqtk sample -s 11 - 0.999 | /hwfssz1/ST_BIGDATA/USER/zhusitao/Software/pigz-2.4/pigz -p 4 > {outdir}/catfq/{sampleid}_1.fq.gz'.format(fq1=fq1,outdir=outdir,sampleid=sampleid)
-	cmd2 = 'zcat {fq2}|/hwfssz1/ST_BIGDATA/USER/zhusitao/Software/seqtk/seqtk sample -s 11 - 0.999 | /hwfssz1/ST_BIGDATA/USER/zhusitao/Software/pigz-2.4/pigz -p 4 > {outdir}/catfq/{sampleid}_1.fq.gz'.format(fq2=fq2,outdir=outdir,sampleid=sampleid)
+	cmd1 = 'zcat {fq1}|/hwfssz1/ST_BIGDATA/USER/zhusitao/Software/seqtk/seqtk sample -s 11 - 0.999 | /hwfssz1/ST_BIGDATA/USER/zhusitao/Software/pigz-2.4/pigz -p 4 > {cat_dir}/{sampleid}_1.fq.gz'.format(fq1=fq1,cat_dir=cat_dir,sampleid=sampleid)
+	cmd2 = 'zcat {fq2}|/hwfssz1/ST_BIGDATA/USER/zhusitao/Software/seqtk/seqtk sample -s 11 - 0.999 | /hwfssz1/ST_BIGDATA/USER/zhusitao/Software/pigz-2.4/pigz -p 4 > {cat_dir}/{sampleid}_1.fq.gz'.format(fq2=fq2,cat_dir=cat_dir,sampleid=sampleid)
 	with open(cat_dir+"/catfq.sh",'w') as F:
 		F.writelines(cmd1+"\n")
 		F.writelines(cmd2+"\n")
@@ -23,15 +23,15 @@ def catfq(fqpath,sampleid,chipID,outdir):
 	return [final_fq1,final_fq2]
 
 def qc(fq1,fq2,sampleid,jobBin,outdir):
-	qc_dir = os.path.join(outdir,'steq2_qc')
+	qc_dir = os.path.join(outdir,'step2_qc')
 	os.makedirs(qc_dir)
 	os.makedirs(os.path.join(qc_dir,sampleid))
 	export_path = """export LIBRARY_PATH=/hwfssz1/BIGDATA_COMPUTING/gongchun/zlib/lib:$LIBRARY_PATH\nexport LD_LIBRARY_PATH=/hwfssz1/BIGDATA_COMPUTING/gongchun/zlib/lib:$LD_LIBRARY_PATH """
-	cmd = """{jobbin}/soapnuke/soapnuke_v2.0/SOAPnuke2-master/SOAPnuke filter -n 0.1 -q 0.5 -T 4 -l 12 -Q 2 -G 2 -M 2 -f AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA -r AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG 
-			-1 {fq1} 
-			-2 {fq2} 
-			-o {qc_dir}/{sampleid} 
-			-C {sampleid}.1.clean.fq 
+	cmd = """{jobbin}/soapnuke/soapnuke_v2.0/SOAPnuke2-master/SOAPnuke filter -n 0.1 -q 0.5 -T 4 -l 12 -Q 2 -G 2 -M 2 -f AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA -r AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG \\
+			-1 {fq1} \\
+			-2 {fq2} \\
+			-o {qc_dir}/{sampleid} \\ 
+			-C {sampleid}.1.clean.fq \\ 
 			-D {sampleid}.2.clean.fq """.format(jobbin=jobBin,fq1=fq1,fq2=fq2,sampleid=sampleid,qc_dir=qc_dir)
 	with open(qc_dir+"/qc.sh",'w') as F:
 		F.writelines(export_path+"\n")
@@ -42,7 +42,7 @@ def qc(fq1,fq2,sampleid,jobBin,outdir):
 
 def bolt(outdir,clean_fq1,clean_fq2,sampleid,platform):
 	samplelist = os.path.join(outdir,'sample.list')
-	bolt_dir = os.path.join(outdir,'steq3_bolt')
+	bolt_dir = os.path.join(outdir,'step3_bolt')
 	os.makedirs(bolt_dir)
 	with open(samplelist,'w') as F:
 		out = ','.join([sampleid,sampleid,sampleid,platform,clean_fq1,clean_fq2])
@@ -54,7 +54,7 @@ def bolt(outdir,clean_fq1,clean_fq2,sampleid,platform):
 	return os.path.join(bolt_dir,sampleid,'output.sortdup.bqsr.bam'),os.path.join(bolt_dir,sampleid,'output.sortdup.bqsr.bam.HaplotypeCaller.vcf.gz')
 
 def bamStat(bam,sampleid,reference,jobBin,outdir):
-	bamStat_dir = os.path.join(outdir,'steq4_bamStat')
+	bamStat_dir = os.path.join(outdir,'step4_bamStat')
 	os.makedirs(bamStat_dir)
 	export_path = "export PATH=/hwfssz1/ST_BIGDATA/USER/zhusitao/Software/R-3.2.0/bin/:$PATH\nexport LD_LIBRARY_PATH=/ldfssz1/ST_BIGDATA/USER/zhusitao/wdl/bolt/02.soft/lib:$LD_LIBRARY_PATH\nexport PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:$PATH"
 	cmd = """
@@ -74,13 +74,13 @@ def bamStat(bam,sampleid,reference,jobBin,outdir):
 
 
 def bamSplit(bolt_bam,sampleid,jobBin,outdir,chromlist):
-	split_dir = os.path.join(outdir,'steq5_split',sampleid)
+	split_dir = os.path.join(outdir,'step5_split',sampleid)
 	os.makedirs(split_dir)
 	cmd = ''
 	for chrom in chromlist:
 		each_dir = os.path.join(split_dir,chrom)
 		os.makedirs(each_dir)
-		cmd+="{jobbin}/samtools/samtools-1.3.1/samtools view -b -h {bolt_bam} {chrom} > {each_dir}/${sampleid}.${chrom}.sort.bam\n".format(jobbin=jobBin,bolt_bam=bolt_bam,chrom=chrom,each_dir=each_dir,sampleid=sampleid)
+		cmd+="{jobbin}/samtools/samtools-1.3.1/samtools view -b -h {bolt_bam} {chrom} > {each_dir}/{sampleid}.{chrom}.sort.bam\n".format(jobbin=jobBin,bolt_bam=bolt_bam,chrom=chrom,each_dir=each_dir,sampleid=sampleid)
 	with open(split_dir+"/split.sh",'w') as F:
 		F.writelines(cmd+'\n')
 
@@ -104,12 +104,13 @@ def vqsr(bolt_vcf,sampleid,reference,jobBin,outdir):
 	dbsnp = "/ifs4/BC_PUB/biosoft/pipeline/DNA/DNA_Human_WGS/DNA_Human_WGS_2018a/Database/hg19/gatk/dbsnp_138.hg19.vcf.gz"
 	indel_gold = "/ifs4/BC_PUB/biosoft/pipeline/DNA/DNA_Human_WGS/DNA_Human_WGS_2018a/Database/hg19/gatk/Mills_and_1000G_gold_standard.indels.hg19.vcf.gz"
 
-	vqsr_dir = os.path.join(outdir,'steq6_vqsr')
+	vqsr_dir = os.path.join(outdir,'step6_vqsr')
 	os.makedirs(vqsr_dir)
 	snp_dir = os.path.join(vqsr_dir,'SNP')
 	os.makedirs(snp_dir)
 	indel_dir = os.path.join(vqsr_dir,'INDEL')
 	os.makedirs(indel_dir)
+	os.makedirs(os.path.join(outdir,'java_tmp'))
 
 	raw_snp_indel_vcf=os.path.join(outdir,'bolt','output.sortdup.bqsr.bam.HaplotypeCaller.vcf.gz')
 	os.makedirs(os.path.join(snp_dir,sampleid))
@@ -132,9 +133,9 @@ def vqsr(bolt_vcf,sampleid,reference,jobBin,outdir):
 	indel_final_vcf = os.path.join(indel_dir,sampleid,sampleid+".indel.final.vcf")
 
 
-	cmd_snp = """{java} -Xmx6g -Djava.io.tmpdir=${outdir}/java_tmp -jar {gatk} -T VariantRecalibrator -R {reference} -input {raw_snp_indel_vcf} {SNPparameter1} {SNPparameter2} -resource:hapmap,known=false,training=true,truth=true,prior=15.0 {hapmap} -resource:omni,known=false,training=true,truth=true,prior=12.0 {omin} -resource:1000G,known=false,training=true,truth=false,prior=10.0 {G1000} -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 {dbsnp} -recalFile {snprecalFile} -tranchesFile {snptranchesFile} -rscriptFile {snprscriptFile}
-	{java} -Xmx6g -Djava.io.tmpdir=${outdir}/java_tmp -jar {gatk} -T ApplyRecalibration -R {reference} -input {raw_snp_indel_vcf} --ts_filter_level 99.5 -recalFile {snprecalFile} -tranchesFile {snptranchesFile} -mode SNP -o {snp_vqsr_vcf}"
-	"grep -E 'PASS|#' {snp_vqsr_vcf} > {snp_vqsr_filter_vcf}"
+	cmd_snp = """{java} -Xmx6g -Djava.io.tmpdir={outdir}/java_tmp -jar {gatk} -T VariantRecalibrator -R {reference} -input {raw_snp_indel_vcf} {SNPparameter1} {SNPparameter2} -resource:hapmap,known=false,training=true,truth=true,prior=15.0 {hapmap} -resource:omni,known=false,training=true,truth=true,prior=12.0 {omin} -resource:1000G,known=false,training=true,truth=false,prior=10.0 {G1000} -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 {dbsnp} -recalFile {snprecalFile} -tranchesFile {snptranchesFile} -rscriptFile {snprscriptFile}
+	{java} -Xmx6g -Djava.io.tmpdir={outdir}/java_tmp -jar {gatk} -T ApplyRecalibration -R {reference} -input {raw_snp_indel_vcf} --ts_filter_level 99.5 -recalFile {snprecalFile} -tranchesFile {snptranchesFile} -mode SNP -o {snp_vqsr_vcf}
+	grep -E 'PASS|#' {snp_vqsr_vcf} > {snp_vqsr_filter_vcf}
 	{java} -Xmx6g -Djava.io.tmpdir={outdir}/java_tmp -jar {gatk} -T VariantFiltration -R {reference} --filterExpression "QD < 2.0 || MQ < 40.0 || ReadPosRankSum < -8.0 || FS > 60.0 || HaplotypeScore > 13.0 || MQRankSum < -12.5" --filterName LowQualFilter --missingValuesInExpressionsShouldEvaluateAsFailing --logging_level ERROR --variant {snp_vqsr_filter_vcf} -o {snp_vqsr_filtered_vcf}
 	grep -E 'PASS|#' {snp_vqsr_filtered_vcf} > {snp_final_vcf}""".format(outdir=outdir,java=java,gatk=gatk,reference=reference,raw_snp_indel_vcf=raw_snp_indel_vcf,SNPparameter1=SNPparameter1,SNPparameter2=SNPparameter2,hapmap=hapmap,omin=omin,G1000=G1000,dbsnp=dbsnp,snprecalFile=snprecalFile,snptranchesFile=snptranchesFile,snprscriptFile=snprscriptFile,snp_vqsr_vcf=snp_vqsr_vcf,snp_vqsr_filter_vcf=snp_vqsr_filter_vcf,snp_vqsr_filtered_vcf=snp_vqsr_filtered_vcf,snp_final_vcf=snp_final_vcf)
 
@@ -204,6 +205,7 @@ def main():
 	outdir = args[0]
 	if not os.path.exists(outdir):
 		os.makedirs(outdir,0o755)
+		os.makedirs(os.path.join(outdir,'report','stat'))
 	fqpath = opts.fqpath
 	sampleid = opts.sampleid
 	chipID = opts.chip
