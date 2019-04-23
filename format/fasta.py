@@ -10,7 +10,7 @@ Dest: a DNA fasta class; used in python 3.6
 """
 
 
-fastaName = "zhusitao"
+
 BASES = ['T', 'C', 'A', 'G']
 CODONS = [a + b + c for a in BASES for b in BASES for c in BASES]
 AMINO_ACIDS = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
