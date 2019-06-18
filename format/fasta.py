@@ -1,7 +1,6 @@
 import re,os
 from random import sample
 from itertools import groupby
-from collections import defaultdict
 
 """
 Author: Zhu Sitao
@@ -78,9 +77,9 @@ class Fasta(object):
 		fh = open(self.path)
 		faiter = (x[1] for x in groupby(fh, lambda line: line[0] == ">"))
 		for header in faiter:
-			header = header.__next__()[1:].strip()  # [1:] 为了去除 > 符号
+			header = header.__next__()[1:].strip()  # [1:] 为了去除 > 符号 header is a class 'itertools._grouper'
 			header = header  # header.split()[0] 对名称进行简化，当前的做法是保存全部名称
-			seq = "".join(s.strip() for s in faiter.__next__())
+			seq = "".join(s.strip() for s in faiter.__next__()) # faiter is a class 'generator'
 			self._fasta[header] = Record(header, seq)  # self._fasta[header] = seq.upper()
 
 
