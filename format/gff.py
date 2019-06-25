@@ -50,9 +50,10 @@ class gffParse(object):
 class GFF(object):
 	""" Read GFF(general feature format) """
 	def __init__(self,gffPath):
-		self._gff = dict()
 		self.gffPath = gffPath
-		self._class = none
+		self.gff = self.all_gff()
+
+		self._class = None
 		self._mRNA = dict()
 		self._CDS = dict()
 		self.version3 = self.gff_version()
@@ -75,6 +76,14 @@ class GFF(object):
 		""" Return gff file line by line through generator """
 		for line in self._handle():
 			yield line
+	def all_gff(self):
+		"""return a dict by rownum"""
+		allgff=dict()
+		for num,line in enumerate(self.readGFF()):
+			if not line.startswith("#"):
+				allgff[num]=line
+		return allgff
+
 	def gff_version(self):
 		""" return gff version """
 		version = int(self._handle().readline().strip().split()[1])
@@ -146,6 +155,7 @@ class GFF(object):
 		mrnaid_uniq = list(set(mrnaid))
 		mrnaid_uniq_sort = sorted(mrnaid_uniq)
 		return mrnaid_uniq_sort
+
 	def mrnaCount(self):
 		mrnaid = self.mrnaID()
 		return len(mrnaid)
