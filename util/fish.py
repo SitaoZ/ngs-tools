@@ -6,6 +6,7 @@ from itertools import groupby
 sys.path.append('/Users/zhusitao/Flow/ngs-tools/format')
 from gff import GFF
 from fasta import Fasta
+from fastq import Fastq
 
 """
 Author: Zhu Sitao
@@ -25,10 +26,6 @@ def readGff(baitPath,Bait:dict):
 		match = pattern.search(line.split('\t')[8])
 		if match:
 			Bait[match.group(2)] = 1
-
-
-
-
 
 def outputGff(fishPath,Bait,Except):
 	""" output gff file from fish pool """
@@ -60,18 +57,26 @@ def outputFasta(fishPath,Bait,Except):
 	""" output fasta from fish pool """
 	fasta = Fasta(fishPath).readFasta()
 	for ID,record in fasta.items():
+		line_out = record.fasta_parse()
 		if not Except:
 			if Bait.get(ID):
-				line_out = record.fasta_parse()
-				print(record.fasta_parse())
+				print(record.fasta_parse().strip())
+		else:
+			if not Bait.get(ID):
+				print(record.fasta_parse().strip())
 
 
-		
-		
+def readFastq(baitPath,Bait):
+	fastq = Fastq(baitPath)
+
+
+
 
 def main():
 	USAGE = """
-		python fish.py -a -b -c -d 8 bait.fa fish.fa > result.fa	
+		python fish.py -bf fasta -bc 1 -ff fasta -fc 1 bait.fa fish.fa > result.fa    # bait.fa in fish.fa
+		python fish.py -bf fasta -ff fasta -E bait.fa fish.fa > result.fa # bait.fa not in fish.fa
+		python fish.py -bf gff -ff gff 
 		"""
 	parser = argparse.ArgumentParser(description='The program use bait to get wanted fish!')
 	parser.add_argument('-bf', '--bait_format', help='bait file formate [table,fasta,gff,fq]', action='store')
@@ -89,10 +94,10 @@ def main():
 	parser.add_argument('--version', action='version', version='%(prog)s 1.0')
 
 	args = parser.parse_args()
-	#print('args', args)
-	#print('bait', args.bait)
-	#print('fish', args.fish)
-	#print('Except', args.Except)
+	print('args', args)
+	print('bait', args.bait)
+	print('fish', args.fish)
+	print('Except', args.Except)
 	Except = args.Except
 
 	Bait = {}
