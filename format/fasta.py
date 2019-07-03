@@ -67,7 +67,7 @@ class Fasta(object):
 	def __init__(self, filePath):
 		self._fasta = dict()
 		self.path = filePath
-		self.readFasta()
+		#self.readFasta()
 
 	def readFasta(self):
 		""" Read Fasta file and load in a dict ,normal method
@@ -81,6 +81,7 @@ class Fasta(object):
 			header = header  # header.split()[0] 对名称进行简化，当前的做法是保存全部名称
 			seq = "".join(s.strip() for s in faiter.__next__()) # faiter is a class 'generator'
 			self._fasta[header] = Record(header, seq)  # self._fasta[header] = seq.upper()
+		return self._fasta
 
 
 	def __iter__(self):
