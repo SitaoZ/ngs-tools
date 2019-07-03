@@ -17,6 +17,22 @@ RANGES = {
     'solexa': (59, 106),
     'phred64': (64, 106),
 }
+
+class Record(object):
+    """a class for fastq record
+    """
+    def __init__(self,name,seq,qual):
+        self.read_name = name
+        self.seq = seq
+        self.qual = qual
+
+    def read_id(self):
+        return self.read_name
+    def seq(self):
+        return self.seq
+    def qual(self):
+        return self.qual
+
 class Fastq(object):
     """a class deal fastq file
         new fastq name: @HISEQ:310:C5MH9ANXX:1:1101:3517:2043 2:N:0:TCGGTCAC
@@ -36,6 +52,8 @@ class Fastq(object):
         for line in FH:
             yield line
         FH.close()
+    def fastq_to_dict(self):
+        """ return dict{fastq_id:}"""
 
     def qualitySystem(self):
         """ Return quality system """
