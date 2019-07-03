@@ -1,5 +1,5 @@
 import re
-from format.fasta import Fasta
+from fasta import Fasta
 """
 Author: Zhu Sitao
 Date: 2018-3-21
