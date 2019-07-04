@@ -21,17 +21,23 @@ RANGES = {
 class Record(object):
     """a class for fastq record
     """
-    def __init__(self,name,seq,qual):
+    def __init__(self,name,seq,desc,qual):
         self.read_name = name
         self.seq = seq
+        self.desc = desc
         self.qual = qual
 
     def read_id(self):
         return self.read_name
     def seq(self):
         return self.seq
+    def desc(self):
+        return self.desc
     def qual(self):
         return self.qual
+    def fastq_parse(self):
+        """ parse to a list """
+        return '\n'.join([self.read_name,self.seq,self.desc,self.qual])
 
 class Fastq(object):
     """a class deal fastq file
@@ -54,6 +60,25 @@ class Fastq(object):
         FH.close()
     def fastq_to_dict(self):
         """ return dict{fastq_id:}"""
+        fqdict = {}
+        flag = 0
+        record = []
+        for line in self.readFastq():
+            line = line.strip()
+            flag += 1
+            if flag == 1:
+                record.append(line)  # ID
+            if flag == 2:
+                record.append(line)  # sequence
+            if flag == 3:
+                record.append(line)  # description
+            if flag == 4:
+                record.append(line)  # quality
+                fqdict[record[0]] = Record(record[0],record[1],record[2],record[3])
+                record.clear() # clear list
+                flag = 0       # break
+        return fqdict
+
 
     def qualitySystem(self):
         """ Return quality system """
