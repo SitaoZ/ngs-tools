@@ -60,14 +60,29 @@ def outputFasta(fishPath,Bait,Except):
 		line_out = record.fasta_parse()
 		if not Except:
 			if Bait.get(ID):
-				print(record.fasta_parse().strip())
+				print(line_out.strip())
 		else:
 			if not Bait.get(ID):
-				print(record.fasta_parse().strip())
+				print(line_out.strip())
 
 
 def readFastq(baitPath,Bait):
-	fastq = Fastq(baitPath)
+	bait_fastq = Fastq(baitPath)
+	fqdict = bait_fastq.fastq_to_dict()
+	for key in fqdict:
+		Bait[key] = 1
+
+def outputFastq(fishPath,Bait,Except):
+	fish_fastq = Fastq(fishPath)
+	fqdict = fish_fastq.fastq_to_dict()
+	for ID,record in fqdict.items():
+		line_out = record.fastq_parse()
+		if not Except:
+			if Bait.get(ID):
+				print(line_out.strip())
+		else:
+			if not Bait.get(ID):
+				print(line_out.strip())
 
 
 
@@ -108,9 +123,9 @@ def main():
 	elif args.bait_format == 'fasta' or (args.bait_format == None and args.bait.endswith('.fa')):
 		readFasta(args.bait, Bait)
 		outputFasta(args.fish, Bait,Except)
-	elif args.bait_format == 'fq' or (args.bait_format == None and args.bait.endswith('.fq')):
-		readFq(args.bait, Bait)
-		outputFq(args.fish, Bait)
+	elif args.bait_format == 'fastq' or (args.bait_format == None and args.bait.endswith('.fq')):
+		readFastq(args.bait, Bait)
+		outputFastq(args.fish, Bait,Except)
 	else:
 		readTable(args.bait, Bait)
 		outputTable(args.fish, Bait)
