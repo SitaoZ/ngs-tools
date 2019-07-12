@@ -1,5 +1,5 @@
 import re
-from fasta import Fasta
+from fasta import Fasta,fasta_record
 """
 Author: Zhu Sitao
 Date: 2018-3-21
@@ -30,18 +30,31 @@ attribute - A semicolon-separated list of tag-value pairs, providing additional 
 
 class gffParse(object):
 	""" a parse for gff line """
-	def __init__(self,seqname,source,feature,start,end,score,strand,frame,attribute):
-		self.seqname = seqname
-		self.source = source
-		self.feature = feature
-		self.start = start
-		self.end = end
-		self.score = score
-		self.strant = strand
-		self.frame = frame
-		self.attribute = attribute
+	def __init__(self,line):
+		self.line = line
+		self._attrs = line.strip().split()
+	def seqid(self):
+		return self._attrs[0]
+	def source(self):
+		return self._attrs[1]
+	def feature(self):
+		return self._attrs[2]
+	def start(self):
+		return self._attrs[3]
+	def end(self):
+		return self._attrs[4]
+	def score(self):
+		return self._attrs[5]
+	def strand(self):
+		return self._attrs[6]
+	def frame(self):
+		return self._attrs[7]
+	def attribute(self):
+		return self._attrs[8]
 	def region(self):
-		return eval(self.end) - eval(self.start)
+		return eval(self.end()) - eval(self.start())
+	def out(self):
+		return self.line
 
 
 
@@ -59,7 +72,7 @@ class GFF(object):
 		self.version3 = self.gff_version()
 		self.geneid_pattern = re.compile(r'geneID=(?P<id>\S+);?')
 		self.mRNA_pattern = re.compile(r'ID=(?P<id>\S+);')
-		self.cds_pattern = re.compile(r'Parent=(?P<id>\S+);?')
+		self.cds_pattern = re.compile(r'Parent=(?P<id>\S+);')
 
 
 	def __iter__(self):
@@ -72,6 +85,7 @@ class GFF(object):
 		else:
 			fh = open(self.gffPath, 'r')
 		return fh
+
 	def readGFF(self):
 		""" Return gff file line by line through generator """
 		for line in self._handle():
@@ -81,15 +95,16 @@ class GFF(object):
 		allgff=dict()
 		for num,line in enumerate(self.readGFF()):
 			if not line.startswith("#"):
-				allgff[num]=line
+				allgff[num]=gffParse(line)
 		return allgff
 
 	def gff_version(self):
 		""" return gff version """
-		version = int(self._handle().readline().strip().split()[1])
+		#version = int(self._handle().readline().strip().split()[1])
+		version = 3
 		return True if version == 3 else False
 
-	def annotation_chr(self):
+	def annotation_chr_list(self):
 		""" Return a chromosome list """
 		chr_list = []
 		for line in self.readGFF():
@@ -126,7 +141,7 @@ class GFF(object):
 		return types
 
 
-	def geneID(self):
+	def gene_id_list(self):
 		""" Return gene id list """
 		geneid = []
 		for line in self.readGFF():
@@ -140,10 +155,10 @@ class GFF(object):
 		return geneid_uniq_sort
 	def geneCount(self):
 		""" Return gene total number """
-		geneid = self.geneID()
+		geneid = self.gene_id_list()
 		return len(geneid)
 
-	def mrnaID(self):
+	def mrna_id_list(self):
 		""" Return transcript id list """
 		mrnaid = []
 		for line in self.readGFF():
@@ -157,7 +172,7 @@ class GFF(object):
 		return mrnaid_uniq_sort
 
 	def mrnaCount(self):
-		mrnaid = self.mrnaID()
+		mrnaid = self.mrna_id_list()
 		return len(mrnaid)
 
 	def exonCount(self):
@@ -176,51 +191,42 @@ class GFF(object):
 		genome.readFasta()
 		genomeDict = genome._fasta
 		forward = {}
-		for line in self.readGFF():
-			if line.startswith("#"):
-				continue
-			array = line.strip().split('\t')
-			scaff,program,structure,start,end,orient = array[0],array[1],array[2],int(array[3]),int(array[4]),array[6]
-			if structure == "mRNA":
-				key = self.mRNA_pattern.search(line).group("id")
-				seq = genomeDict[scaff][start-1:end]
-				if orient == "+":
+		for record in self.all_gff().values():
+			start,end = int(record.start()),int(record.end())
+			if record.feature() == "mRNA":
+				key = self.mRNA_pattern.search(record.attribute()).group("id")
+				seq = genomeDict[record.seqid()].get_seq()[start-1:end]
+				if record.strand() == "+":
 					forward[key] = seq
 				else:
 					seq = seq.replace('A','{A}').replace('T','{T}').replace('C','{C}').replace('G','{G}')
 					seq = seq.format(A='T', T='A', C='G', G='C')[::-1]
-					forward[key] =seq
+					forward[key] = seq
 
 		mRNAfasta = open(mRNAfasta_path,'w')
 		for key in forward:
-			mRNAfasta.writelines(">"+key+"\n")
-			mRNAfasta.writelines(forward[key]+"\n")
+			fa = fasta_record(key,forward[key])
+			mRNAfasta.writelines(fa.fasta_parse())
 		mRNAfasta.close()
 
 
-
-
-
-	def CDS_fasta(self,genomefasta_path,cds_outpath):
+	def cds_fasta(self,genomefasta_path,cds_outpath):
 		genome = Fasta(genomefasta_path)
 		genome.readFasta()
 		genomeDict = genome._fasta
 		forward = {}
 		reverse = {}
-		for line in self.readGFF():
-			if line.startswith("#"):
-				continue
-			array = line.strip().split('\t')
-			scaff,program,structure,start,end,orient = array[0],array[1],array[2],int(array[3]),int(array[4]),array[6]
-			if structure == "mRNA":
+		for record in self.all_gff().values():
+			start,end = map(int,[record.start(),record.end()])
+			if record.feature() == "mRNA":
 				seq2 = ''
 				seq3 = ''
-			elif structure == "CDS":
-				key = self.cds_pattern.search(line).group("id")
-				out = genomeDict[scaff][start-1:end]
+			elif record.feature() == "CDS":
+				key = self.cds_pattern.search(record.attribute()).group("id")
+				out = genomeDict[record.seqid()].get_seq()[start-1:end]
 				seq2 += out
 				seq3 += out
-				if orient == "+":
+				if record.strand() == "+":
 					forward[key] = seq2
 				else:
 					reverse[key] = seq3
@@ -231,14 +237,13 @@ class GFF(object):
 			forward[key] = seq
 		CDS = open(cds_outpath,'w')
 		for key in sorted(forward.keys()):
-			CDS.writelines(">"+key+"\n")
-			j = 0
-			out = ''
-			for j in range(0, len(forward[key]), 60):
-				out = forward[key][j:j+60]
-				CDS.write(out+"\n")
+			fa = fasta_record(key,forward[key])
+			CDS.writelines(fa.fasta_parse())
 		CDS.close()
 
+	def sortGFF(self):
+		""" a """
+		pass
 
 
 
