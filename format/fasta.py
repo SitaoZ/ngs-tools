@@ -16,7 +16,7 @@ AMINO_ACIDS = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
 CODON_TABLE = dict(zip(CODONS, AMINO_ACIDS))
 
 
-class Record(object):
+class fasta_record(object):
 	""" a atom of fasta file """
 	def __init__(self,id,seq,form="DNA"):
 		self.id = id
@@ -78,9 +78,9 @@ class Fasta(object):
 		faiter = (x[1] for x in groupby(fh, lambda line: line[0] == ">"))
 		for header in faiter:
 			header = header.__next__()[1:].strip()  # [1:] 为了去除 > 符号 header is a class 'itertools._grouper'
-			header = header  # header.split()[0] 对名称进行简化，当前的做法是保存全部名称
+			header = header.split()[0]  # header.split()[0] 对名称进行简化，当前的做法是保存全部名称
 			seq = "".join(s.strip() for s in faiter.__next__()) # faiter is a class 'generator'
-			self._fasta[header] = Record(header, seq)  # self._fasta[header] = seq.upper()
+			self._fasta[header] = fasta_record(header, seq)  # self._fasta[header] = seq.upper()
 		return self._fasta
 
 
