@@ -85,6 +85,33 @@ def outputFastq(fishPath,Bait,Except):
 				print(line_out.strip())
 
 
+def readTable(baitPath,Bait,bait_column,separator="\t"):
+	bait_table = {}
+	with open(baitPath,'r') as F:
+		for line in F.readlines():
+			line = line.strip()
+			tmp = line.split(sep=separator)
+			ID = tmp[bait_column-1]
+			bait_table[ID] = 1
+
+def outputTable(fishPath,Bait,fish_column,Except,separator="\t"):
+	fish_table = {}
+	with open(fishPath,'r') as F:
+		for line in F.readlines():
+			line = line.strip()
+			tmp = line.split(sep=separator)
+			ID = tmp[fish_column-1]
+			fish_table[ID] = line
+	for ID in fish_table.keys():
+		if not Except:
+			if Bait.get(ID):
+				print(fish_table[ID])
+		else:
+			if not Bait.get(ID):
+				print(fish_table[ID])
+
+
+
 
 
 def main():
@@ -127,8 +154,8 @@ def main():
 		readFastq(args.bait, Bait)
 		outputFastq(args.fish, Bait,Except)
 	else:
-		readTable(args.bait, Bait)
-		outputTable(args.fish, Bait)
+		readTable(args.bait, Bait,1)
+		outputTable(args.fish, Bait,1,Except)
 
 if __name__ == '__main__':
 	main()
