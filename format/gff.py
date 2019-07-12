@@ -28,7 +28,7 @@ attribute - A semicolon-separated list of tag-value pairs, providing additional 
 
 
 
-class gffParse(object):
+class gff_record(object):
 	""" a parse for gff line """
 	def __init__(self,line):
 		self.line = line
@@ -95,7 +95,7 @@ class GFF(object):
 		allgff=dict()
 		for num,line in enumerate(self.readGFF()):
 			if not line.startswith("#"):
-				allgff[num]=gffParse(line)
+				allgff[num]=gff_record(line)
 		return allgff
 
 	def gff_version(self):
