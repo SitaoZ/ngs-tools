@@ -18,7 +18,7 @@ RANGES = {
     'phred64': (64, 106),
 }
 
-class Record(object):
+class fastq_record(object):
     """a class for fastq record
     """
     def __init__(self,name,seq,desc,qual):
@@ -74,7 +74,7 @@ class Fastq(object):
                 record.append(line)  # description
             if flag == 4:
                 record.append(line)  # quality
-                fqdict[record[0]] = Record(record[0],record[1],record[2],record[3])
+                fqdict[record[0]] = fastq_record(record[0],record[1],record[2],record[3])
                 record.clear() # clear list
                 flag = 0       # break
         return fqdict
