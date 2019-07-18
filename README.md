@@ -9,10 +9,10 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    from fasta import Fasta
    fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa')
    len(fasta_obj)
->>> fasta_dict = fasta_obj.readFasta()
->>> fasta_ids = fasta_obj.fasta_key()
->>> fasta_seq = fasta_obj.fasta_sequence()
->>> fasta_obj.gc_rate("gc_rate.txt")
->>> fasta_max_seq = fasta_obj.extract_item('max',"max_fasta.fa")
->>> fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa")
->>> a_fasta = fasta_obj['a']
+   fasta_dict = fasta_obj.readFasta()
+   fasta_ids = fasta_obj.fasta_key()
+   fasta_seq = fasta_obj.fasta_sequence()
+   fasta_obj.gc_rate("gc_rate.txt")
+   fasta_max_seq = fasta_obj.extract_item('max',"max_fasta.fa")
+   fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa")
+   a_fasta = fasta_obj['a']
