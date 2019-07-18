@@ -1,6 +1,6 @@
-# ngs-tools
+# Overview
 
-Python program for bioinformatics. Package format is a bioinformatics file format. Package util is a common tools software. Package PopGen is a population genetics software
+The ngs-tools is python package for bioinformatics. Package format is a bioinformatics file format. Package util is a common tools software. Package PopGen is a population genetics software
 
 1. **Install** <br>
     ```bash
