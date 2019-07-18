@@ -10,7 +10,7 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
     make && make install
     git clone https://github.com/zhusitao1990/ngs-tools.git
     ```
-2. **Fasta example** <br>
+2. **Fasta usage** <br>
    ```Python
     >>> from fasta import Fasta
     >>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa')
@@ -24,7 +24,7 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
     >>> fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa") # exact a min length fasta
     ```
 
-3. **Fastq example** <br>
+3. **Fastq usage** <br>
     ```Python
     >>> from fastq import Fastq
     >>> fastq_obj = Fastq('/Users/zhusitao/data/kio.fastq')
@@ -33,5 +33,18 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
     >>> fastq_dict = fastq_obj.fastq_to_dict()       # return a dict dict[key] = fastq_record
     >>> index_seq = fastq_obj.indexSequence()        # return index sequence if exist
     >>> pairOrSingel = fastq_obj.pairOrSingel()      # return pair or singel
+    ```
+
+4. **GFF usage**
+    ```Python
+    >>> from gff import GFF
+    >>> gff_obj = GFF("gff.path")
+    >>> gff_dict = gff_obj.all_gff()      # return a dict[rownum] = gff_record
+    >>> gene_number = gff_obj.geneCount() # return gene number
+    >>> mRNA_number = gff_obj.mrnaCount() # return mRNA number
+    >>> exon_number = gff_obj.exonCount() # return exon number
+    >>> gff_obj.mRNA_fasta("mRNA_fa path")# exact mRNA fasta
+    >>> gff_obj.cds_fasta("cds_fa path")  # cds fasta path
+
     ```
 
