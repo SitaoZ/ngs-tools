@@ -6,7 +6,8 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    git clone https://github.com/zhusitao1990/ngs-tools.git <br>
 
 2. **Fasta example** <br>
-   \>>> ```from fasta -import Fasta``` <br>
+   \>>> ```python
+   from fasta -import Fasta``` <br>
    \>>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa') <br>
    \# get fasta object length <br>
    \>>> len(fasta_obj) <br>
