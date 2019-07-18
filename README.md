@@ -6,12 +6,11 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    git clone https://github.com/zhusitao1990/ngs-tools.git <br>
 
 2. **Fasta example** <br>
-   \>>> ```python
-   from fasta import Fasta
-   ``` <br>
+   ```
+   \>>> from fasta import Fasta
+
    \>>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa') <br>
-   \# get fasta object length <br>
-   \>>> len(fasta_obj) <br>
+   \>>> len(fasta_obj)  # get fasta object length <br>
    \>>> a_fasta = fasta_obj['a']          # <br>
    \>>> fasta_dict = fasta_obj.readFasta() # put fasta to a dict contain id and seq <br>
    \>>> fasta_ids = fasta_obj.fasta_key()  # return id list <br>
@@ -19,7 +18,7 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    \>>> fasta_obj.gc_rate("gc_rate.txt")   # return a gc_rate file <br>
    \>>> fasta_max_seq = fasta_obj.extract_item('max',"max_fasta.fa") # exact a max length fasta <br>
    \>>> fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa") # exact a min length fasta <br>
-
+    ``` <br>
 3. **Fastq example** <br>
    \>>> from fastq import Fastq <br>
    \>>> fastq_obj = Fastq('/Users/zhusitao/data/kio.fastq') <br>
