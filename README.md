@@ -10,7 +10,7 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    \>>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa') <br>
    \# get fasta object length <br>
    \>>> len(fasta_obj) <br>
-   \>>> a_fasta = fasta_obj['a']          # index <br>
+   \>>> a_fasta = fasta_obj['a']          # <p align="index">???</p>
    \>>> fasta_dict = fasta_obj.readFasta() # put fasta to a dict contain id and seq <br>
    \>>> fasta_ids = fasta_obj.fasta_key()  # return id list <br>
    \>>> fasta_seq = fasta_obj.fasta_sequence() # return seq list <br>
