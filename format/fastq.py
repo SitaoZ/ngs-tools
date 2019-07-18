@@ -176,7 +176,7 @@ class Fastq(object):
             return "pair end"
 
 
-    def to_fatsta(self,output_fasta):
+    def to_fasta(self,output_fasta):
         """ Transformate fastq into fasta """
         OUT=open(output_fasta,'w')
         flag = 0
