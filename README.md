@@ -8,7 +8,7 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
     cd Python-3.6.1
     ./configure
     make && make install
-    git clone https://github.com/zhusitao1990/ngs-tools.git <br>
+    git clone https://github.com/zhusitao1990/ngs-tools.git
     ```
 2. **Fasta example** <br>
    ```Python
