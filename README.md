@@ -17,8 +17,8 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
     >>> fasta_obj.gc_rate("gc_rate.txt")       # return a gc_rate file
     >>> fasta_max_seq = fasta_obj.extract_item('max',"max_fasta.fa") # exact a max length fasta
     >>> fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa") # exact a min length fasta
-    
-    <br>
+    ```<br>
+
 ## 3. **Fastq example** <br>
     ```
     >>> from fastq import Fastq
