@@ -6,11 +6,11 @@ Python program for bioinformatics. Package format is a bioinformatics file forma
    git clone https://github.com/zhusitao1990/ngs-tools.git <br>
 
 2. **Fasta example** <br>
-   \>>> from fasta import Fasta <br>
+   \>>> -from fasta -import Fasta <br>
    \>>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa') <br>
    \# get fasta object length <br>
    \>>> len(fasta_obj) <br>
-   \>>> a_fasta = fasta_obj['a']          # <p align="index">???</p>
+   \>>> a_fasta = fasta_obj['a']          # <br>
    \>>> fasta_dict = fasta_obj.readFasta() # put fasta to a dict contain id and seq <br>
    \>>> fasta_ids = fasta_obj.fasta_key()  # return id list <br>
    \>>> fasta_seq = fasta_obj.fasta_sequence() # return seq list <br>
