@@ -2,10 +2,10 @@
 
 Python program for bioinformatics. Package format is a bioinformatics file format. Package util is a common tools software. Package PopGen is a population genetics software
 
-1）Install
+1. Install
    git clone https://github.com/zhusitao1990/ngs-tools.git
 
-2) Example
+2. Example
 >>> from fasta import Fasta
 >>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa')
 >>> len(fasta_obj)
