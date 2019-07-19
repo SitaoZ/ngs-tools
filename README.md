@@ -45,6 +45,34 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> exon_number = gff_obj.exonCount() # return exon number
     >>> gff_obj.mRNA_fasta("mRNA_fa path")# exact mRNA fasta
     >>> gff_obj.cds_fasta("cds_fa path")  # cds fasta path
-
     ```
 
+5. **fish usage**
+    ```bash
+    python3 fish.py -h
+
+    usage: fish.py [-h] [-bf BAIT_FORMAT] [-ff FISH_FORMAT] [-bc BAIT_COLUMN]
+               [-fc FISH_COLUMN] [-E] [--version]
+               bait fish
+
+    The program use bait to get wanted fish!
+
+    positional arguments:
+      bait                  bait file [table,fasta,gff,fq]
+      fish                  fish file [table,fasta,gff,fq]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -bf BAIT_FORMAT, --bait_format BAIT_FORMAT
+                        bait file formate [table,fasta,gff,fq]
+      -ff FISH_FORMAT, --fish_format FISH_FORMAT
+                        fish file formate [table,fasta,gff,fq]
+      -bc BAIT_COLUMN, --bait_column BAIT_COLUMN
+                        bait column for extract, default 1st column [-bc 1 or
+                        --bait_column 1]
+      -fc FISH_COLUMN, --fish_column FISH_COLUMN
+                        fish column for extract, default 1st column [-fc 1 or
+                        --fish_column 1]
+      -E, --Except          if -e means contain in fish pool,or not
+      --version             show program's version number and exit
+    ```
