@@ -46,7 +46,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> exon_number = gff_obj.exonCount() # return exon number
     >>> gff_obj.mRNA_fasta("mRNA_fa path")# exact mRNA fasta
     >>> gff_obj.cds_fasta("cds_fa path")  # cds fasta path
-    >>> gff_obj.gff2gtf("gtf_path")
+    >>> gff_obj.gff2gtf("gtf_path")       # transform gff to gtf
     ```
 
 5. **fish usage**
@@ -80,3 +80,20 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     ```
 
 ## Brief introduction of pipe package
+1. **WGS**<br>
+    ```bash
+    python wgs_gatk4.py -h
+
+    Usage: wgs_gatk4.py [options]
+
+    Options:
+        -h, --help      show this help message and exit
+        -1 FASTQ1, --fastq1=FASTQ1
+                        the read1 fastq
+        -2 FASTQ2, --fastq2=FASTQ2
+                        the read2 fastq
+        -r REFERENCE, --reference=REFERENCE
+                        the reference
+        -o OUTDIR, --outDir=OUTDIR
+                        the output dir
+    ```
