@@ -46,6 +46,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> exon_number = gff_obj.exonCount() # return exon number
     >>> gff_obj.mRNA_fasta("mRNA_fa path")# exact mRNA fasta
     >>> gff_obj.cds_fasta("cds_fa path")  # cds fasta path
+    >>> gff_obj.gff2gtf("gtf_path")
     ```
 
 5. **fish usage**
@@ -77,3 +78,5 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
       -E, --Except          if -e means contain in fish pool,or not
       --version             show program's version number and exit
     ```
+
+## Brief introduction of pipe package
