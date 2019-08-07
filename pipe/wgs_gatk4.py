@@ -46,6 +46,18 @@ def minimap2(clean_fq1,clean_fq2,reference,outdir):
     cmd_shell = write_shell(cmd,'alignment',outdir)
     return cmd_shell
 
+def mem2(clean_fq1,clean_fq2,reference,outdir):
+    """ alignment read to genome using meme2 """
+    mem2="/ldfssz1/ST_BIGDATA/USER/zhusitao/software/bwa-mem2/bwa-mem2"
+    align_dir = make_dir(outdir,'mem2')
+    cmd = """{mem2} mem -t 48 -M -Y -R '@RG\tID:DP800004599BR_L01\tLB:DP800004599BR_L01\tSM:DP800004599BR_L01\tPL:ILLUMINA' {reference} {clean_fq1} {clean_fq2} > mem2.sam"""
+    cmd_shell = write_shell(cmd,'alignment',outdir)
+    return cmd_shell
+
+def sortSam():
+    """ sort bam or sam using gatk4"""
+    gatk4=""
+
 def rmdup(input_bam,outdir):
     """ rmdup using latest picards """
     java="/hwfssz1/ST_BIGDATA/USER/liuxing2/software/source/jdk1.8.0_131/bin/java"
