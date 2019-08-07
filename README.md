@@ -2,7 +2,7 @@
 
 The ngs-tools is python package for bioinformatics. Package format is a bioinformatics file format. Package util is a common tools software. Package PopGen is a population genetics software
 
-1.1. **Install** <br>
+1.1 **Install** <br>
     ```bash
     tar -zxvf Python-3.6.1.tgz
     cd Python-3.6.1
@@ -10,7 +10,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     make && make install
     git clone https://github.com/zhusitao1990/ngs-tools.git
     ```
-1.2. **Fasta usage** <br>
+1.2 **Fasta usage** <br>
    ```Python
     >>> from fasta import Fasta
     >>> fasta_obj = Fasta('/Users/zhusitao/data/chr1.fa')
@@ -24,7 +24,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> fasta_min_seq = fasta_obj.extract_item('min',"min_fasta.fa") # exact a min length fasta
     ```
 
-1.3. **Fastq usage** <br>
+1.3 **Fastq usage** <br>
     ```Python
     >>> from fastq import Fastq
     >>> fastq_obj = Fastq('/Users/zhusitao/data/kio.fastq')
@@ -35,7 +35,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> pairOrSingel = fastq_obj.pairOrSingel()      # return pair or singel
     ```
 
-1.4. **GFF usage**
+1.4 **GFF usage**
     ```Python
     >>> from gff import GFF
     >>> gff_obj = GFF("gff.path")
@@ -47,7 +47,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
     >>> gff_obj.cds_fasta("cds_fa path")  # cds fasta path
     ```
 
-1.5. **fish usage**
+1.5 **fish usage**
     ```bash
     python3 fish.py -h
 
