@@ -82,7 +82,7 @@ The ngs-tools is python package for bioinformatics. Package format is a bioinfor
 ## Brief introduction of pipe package
 1. **WGS**<br>
     ```bash
-    python wgs_gatk4.py -h
+    python3 wgs_gatk4.py -h
 
     Usage: wgs_gatk4.py [options]
 
