@@ -245,8 +245,9 @@ class GFF(object):
 		""" a """
 		pass
 
-	def gff2gtf(self):
+	def gff2gtf(self,gtf_path):
 		""" transform gff to gtf """
+		GTF=open(gtf_path,'w')
 		for line in self._handle():
 			# skip comment lines that start with '#'
 			if line[0] != "#":
@@ -258,6 +259,7 @@ class GFF(object):
 					ID = data[-1].split('Parent=')[-1].split(';')[0]
 				#modify last column
 				data[-1] = 'gene_id "'+ID+'"; transcript_id "' + ID
-				print('\t'.join(data))#
+				GTF.writelines('\t'.join(data))
+		GTF.close()
 
 
