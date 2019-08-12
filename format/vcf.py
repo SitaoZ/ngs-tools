@@ -3,6 +3,8 @@ import sys
 import gzip
 import matplotlib.pyplot as plt
 from matplotlib_venn import venn2
+from plotnine import *
+import pandas as pd
 
 """
 Author: Zhu Sitao
@@ -350,17 +352,32 @@ class VCF(object):
 
 	def stat_indel_length(self):
 		""" return a indel length dict for draw indel length histogram """
-		indel_length = {}
+		indel_length = {"delete":{},"insert":{}}
+
 		for recorder in self.readVCF():
 			if len(recorder.REF) == 1 and len(recorder.ALT) == 1:
 				continue
 			else:
-				length = len(recorder.ALT) - len(recorder.REF)
-				if length in indel_length.keys():
-					indel_length[length] += 1
+				if len(recorder.ALT) - len(recorder.REF) > 0: # insert
+					delete_lengthinsert_length = len(recorder.ALT) - len(recorder.REF)
+					if insert_length in insert_length["insert"].keys():
+						indel_length["insert"][length] += 1
+					else:
+						indel_length["insert"][length] = 1
 				else:
-					indel_length[length] = 1
+					delete_length = len(recorder.REF) - len(recorder.ALT)
+					if delete_length in delete_length["delete"].keys():
+						indel_length["delete"][length] += 1
+					else:
+						indel_length["delete"][length] = 1
 		return indel_length
+	def indel_length_plot(self):
+		insert_df = pd.DataFrame(self.indel_length_plot()['insert'].items())
+		insert_df.columns = ['length','count']
+		delete_df = pd.DataFrame(self.indel_length_plot()['delete'].items())
+		base_plot = (ggplot(insert_df,aes(x='length',y='count')))+geom_bar(stat='identity')
+		
+
 
 
 
