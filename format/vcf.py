@@ -1,6 +1,8 @@
 import re,os
 import sys
 import gzip
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2
 
 """
 Author: Zhu Sitao
@@ -219,6 +221,8 @@ class VCF(object):
 	""" VCF class """
 	def __init__(self,vcfpath):
 		self.path = vcfpath
+		self.basename = os.path.basename(vcfpath)
+
 	def readVCF(self):
 		""" Return a vcf file line by line """
 		if not os.path.exists(self.path):
@@ -421,6 +425,22 @@ class VCF(object):
 			else:
 				tv += 1
 		return ts,tv,'%.6f'%(ts/float(tv))
+
+	def compare_vcf(self,other):
+		list1 = []
+		list2 = []
+		for record in self.readVCF():
+			chrom,pos,ref,ale = record.CHROM,record.POS,record.REF,record.ALT
+			list1.append(chrom+pos+ref+ale)
+		for record in other.readVCF():
+			chrom, pos, ref, ale = record.CHROM, record.POS, record.REF, record.ALT
+			list2.append(chrom + pos + ref + ale)
+		set1 = set(list1)
+		set2 = set(list2)
+		plt.figure(figsize=(4,4))
+		venn2(subsets = [set1,set2],set_labels=(self.basename,other.basename),set_colors=('r','g'))
+		plt.savefig("{t1}_vs_{t2}.png".format(t1=self.basename,t2=other.basename))
+
 
 
 
